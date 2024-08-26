@@ -4,29 +4,53 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import create_engine
 from eralchemy2 import render_er
+from datetime import datetime
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class Usuario(Base):
+    __tablename__ = 'usuario'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False)
+    apellido = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
+    contrasenia = Column(String(250), nullable=False)
+    fecha_suscrip = Column(datetime, nullable=False, default=datetime.utcnow)
+    # Relación uno a muchos con Favorite
+    favorites = relationship('Favorite', back_populates='usuario')
+
+class Character(Base):
+    __tablename__ = 'character'
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+class Planet(Base):
+    __tablename__ = 'planet'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    name = Column(String(250), nullable=False)
+
+class Vehicle(Base):
+    __tablename__ = 'vehicle'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False)
+
+class Favorite(Base):
+    __tablename__ = 'favorite'
+    id = Column(Integer, primary_key=True)
+    usuario_id = Column(Integer, ForeignKey('usuario.id'))
+    usuario = relationship('Usuario', back_populates='favorites')
+    
+    character_id = Column(Integer, ForeignKey('character.id'))
+    character = relationship('Character')
+    
+    planet_id = Column(Integer, ForeignKey('planet.id'))
+    planet = relationship('Planet')
+    
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
+    vehicle = relationship('Vehicle')
 
     def to_dict(self):
         return {}
 
-## Draw from SQLAlchemy base
+# Draw from SQLAlchemy base
 render_er(Base, 'diagram.png')
